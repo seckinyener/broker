@@ -11,4 +11,6 @@ public interface IOrderService {
     OrderDetailsDto createOrder(CreateOrderDto createOrderDto);
 
     List<OrderDetailsDto> getOrderListOfUserForDateRange(OrderFilterRequest orderFilterRequest);
+
+    OrderDetailsDto deleteOrder(Long orderId);
 }

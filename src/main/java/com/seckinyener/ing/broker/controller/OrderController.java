@@ -29,4 +29,9 @@ public class OrderController {
     ResponseEntity<List<OrderDetailsDto>> getOrderListOfUserForDateRange(@RequestBody OrderFilterRequest orderFilterRequest) {
         return new ResponseEntity<>(orderService.getOrderListOfUserForDateRange(orderFilterRequest), HttpStatus.OK);
     }
+
+    @DeleteMapping("/delete/{orderId}")
+    ResponseEntity<OrderDetailsDto> deleteOrder(@PathVariable(name="orderId") Long orderId){
+        return new ResponseEntity<>(orderService.deleteOrder(orderId), HttpStatus.OK);
+    }
 }

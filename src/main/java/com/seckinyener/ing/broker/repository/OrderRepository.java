@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
@@ -13,4 +14,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByCustomerIdAndCreateDateAfter(Long customerId, LocalDateTime start);
 
     List<Order> findAllByCustomerIdAndCreateDateBefore(Long customerId, LocalDateTime end);
+
+    Optional<Order> findOrderById(Long id);
 }

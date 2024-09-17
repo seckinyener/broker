@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -28,10 +29,10 @@ public class Order {
     private SideEnum orderSide;
 
     @Column(name="size", nullable = false)
-    private double size;
+    private BigDecimal size;
 
     @Column(name="price", nullable = false)
-    private double price;
+    private BigDecimal price;
 
     @Column(name="status", nullable = false)
     @Enumerated(EnumType.STRING)
