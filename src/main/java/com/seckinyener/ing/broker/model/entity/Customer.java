@@ -1,5 +1,6 @@
 package com.seckinyener.ing.broker.model.entity;
 
+import com.seckinyener.ing.broker.model.enumerated.RoleEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,11 +22,15 @@ public class Customer {
     @Column
     private Long id;
 
-    @Column(name = "username", nullable = false)
+    @Column(name = "username", nullable = false, unique = true)
     private String username;
 
     @Column(name = "password", nullable = false)
     private String password;
+
+    @Column(name="role", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RoleEnum role;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer")
     private List<Asset> assets;
