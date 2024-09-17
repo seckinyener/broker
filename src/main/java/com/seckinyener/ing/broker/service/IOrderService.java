@@ -13,4 +13,6 @@ public interface IOrderService {
     List<OrderDetailsDto> getOrderListOfUserForDateRange(OrderFilterRequest orderFilterRequest);
 
     OrderDetailsDto deleteOrder(Long orderId);
+
+    OrderDetailsDto matchOrder(Long orderId);
 }

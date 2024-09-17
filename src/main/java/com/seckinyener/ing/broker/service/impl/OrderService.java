@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @AllArgsConstructor
 @Service
@@ -97,7 +98,44 @@ public class OrderService implements IOrderService {
             orderRepository.save(order);
             return new OrderDetailsDto(order.getAsset(), order.getSize(), order.getPrice(), order.getStatus(), order.getOrderSide(), order.getCreateDate());
         } else {
-            throw new OrderStatusNotValidForDeletingException("Order status not valid for deletion. Only Pending orders can be deleted..");
+            throw new OrderStatusNotValidException("Order status not valid for deletion. Only Pending orders can be deleted..");
+        }
+    }
+
+    @Override
+    public OrderDetailsDto matchOrder(Long orderId) {
+        Order order = orderRepository.findOrderById(orderId).orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
+        if (order.getStatus().equals(StatusEnum.PENDING)) {
+            Asset customerTRYBalance = assetRepository.findAssetByCustomerIdAndName(order.getCustomer().getId(), "TRY").orElseThrow(() -> new AssetNotFoundException("Asset not found with customer id: " + order.getCustomer().getId() + " and TRY"));
+            Optional<Asset> optionalCustomerAssetOfOrder = assetRepository.findAssetByCustomerIdAndName(orderId, order.getAsset());
+
+            Asset customerAssetOfOrder;
+            if(optionalCustomerAssetOfOrder.isEmpty()) {
+                customerAssetOfOrder = new Asset();
+                customerAssetOfOrder.setName(order.getAsset());
+                customerAssetOfOrder.setCustomer(order.getCustomer());
+                customerAssetOfOrder.setSize(BigDecimal.ZERO);
+                customerAssetOfOrder.setUsableSize(BigDecimal.ZERO);
+            } else {
+                customerAssetOfOrder = optionalCustomerAssetOfOrder.get();
+            }
+
+            if (order.getOrderSide().equals(SideEnum.SELL)) {
+                customerTRYBalance.setSize(customerTRYBalance.getSize().add(order.getPrice().multiply(order.getSize())));
+                customerTRYBalance.setUsableSize(customerTRYBalance.getUsableSize().add(order.getPrice().multiply(order.getSize())));
+                customerAssetOfOrder.setUsableSize(customerAssetOfOrder.getUsableSize().subtract(order.getSize()));
+            } else if (order.getOrderSide().equals(SideEnum.BUY)) {
+                customerAssetOfOrder.setSize(customerAssetOfOrder.getSize().add(order.getSize()));
+                customerAssetOfOrder.setUsableSize(customerAssetOfOrder.getUsableSize().add(order.getSize()));
+            }
+
+            order.setStatus(StatusEnum.MATCHED);
+            orderRepository.save(order);
+            assetRepository.save(customerAssetOfOrder);
+            assetRepository.save(customerTRYBalance);
+            return new OrderDetailsDto(order.getAsset(), order.getSize(), order.getPrice(), order.getStatus(), order.getOrderSide(), order.getCreateDate());
+        } else {
+            throw new OrderStatusNotValidException("Order status not valid for matching. Only Pending orders can be matched..");
         }
     }
 }

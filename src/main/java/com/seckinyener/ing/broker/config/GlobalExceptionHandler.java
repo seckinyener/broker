@@ -48,10 +48,10 @@ public class GlobalExceptionHandler {
         return new ErrorResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST.value(), LocalDateTime.now());
     }
 
-    @ExceptionHandler(OrderStatusNotValidForDeletingException.class)
+    @ExceptionHandler(OrderStatusNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    public ErrorResponseDto handleOrderStatusNotValidForDeletingException(OrderStatusNotValidForDeletingException e) {
+    public ErrorResponseDto handleOrderStatusNotValidForDeletingException(OrderStatusNotValidException e) {
         return new ErrorResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST.value(), LocalDateTime.now());
     }
 

@@ -34,4 +34,9 @@ public class OrderController {
     ResponseEntity<OrderDetailsDto> deleteOrder(@PathVariable(name="orderId") Long orderId){
         return new ResponseEntity<>(orderService.deleteOrder(orderId), HttpStatus.OK);
     }
+
+    @PostMapping("/match/{orderId}")
+    ResponseEntity<OrderDetailsDto> matchOrder(@PathVariable(name="orderId") Long orderId){
+        return new ResponseEntity<>(orderService.matchOrder(orderId), HttpStatus.OK);
+    }
 }
