@@ -40,12 +40,12 @@ public class Order {
     @Column(name="create_date", nullable = false)
     private LocalDateTime createDate;
 
+    @Column(name="asset", nullable = false)
+    private String asset;
+
     @ManyToOne
-    @JoinColumns({
-            @JoinColumn(name = "asset_name", referencedColumnName = "name"),
-            @JoinColumn(name = "customer_id", referencedColumnName = "customer_id")
-    })
-    private Asset asset;
+    @JoinColumn(name="customer_id")
+    private Customer customer;
 
     @PrePersist
     public void prePersist() {
