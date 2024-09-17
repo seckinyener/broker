@@ -53,11 +53,11 @@ public class CustomerService implements ICustomerService {
 
     @Override
     public List<AssetDetailsDto> getCustomerAssets(Long customerId) {
-        Customer customer = customerRepository.findCustomerById(customerId)
-                .orElseThrow((() -> new CustomerNotFoundException("Customer not found with id: " + customerId)));
+        Customer customer = findCustomerById(customerId);
         return customer.getAssets().stream().sorted(Comparator.comparing(Asset::getSize).reversed()).map(item -> new AssetDetailsDto(item.getName(), item.getSize(), item.getUsableSize(), item.getUpdateDate())).toList();
     }
 
+    @Transactional
     @Override
     public DepositResponseDto depositMoneyForCustomer(Long customerId, DepositRequestDto depositRequestDto) {
         Asset assetTRY = assetRepository.findAssetByCustomerIdAndName(customerId, "TRY").orElseThrow(() -> new AssetNotFoundException("Asset not found with customer id: " + customerId + " and TRY"));
@@ -67,6 +67,7 @@ public class CustomerService implements ICustomerService {
         return new DepositResponseDto(assetTRY.getSize(), assetTRY.getUsableSize());
     }
 
+    @Transactional
     @Override
     public WithdrawResponseDto withdrawMoneyForCustomer(Long customerId, WithdrawRequestDto withdrawRequestDto) {
         Asset assetTRY = assetRepository.findAssetByCustomerIdAndName(customerId, "TRY").orElseThrow(() -> new AssetNotFoundException("Asset not found with customer id: " + customerId + " and TRY"));
@@ -78,5 +79,11 @@ public class CustomerService implements ICustomerService {
         assetTRY.setUsableSize(assetTRY.getUsableSize().subtract(withdrawRequestDto.amount()));
         assetRepository.save(assetTRY);
         return new WithdrawResponseDto(assetTRY.getSize(), assetTRY.getUsableSize(), withdrawRequestDto.iban());
+    }
+
+    @Override
+    public Customer findCustomerById(Long customerId) {
+        return customerRepository.findCustomerById(customerId)
+                .orElseThrow((() -> new CustomerNotFoundException("Customer not found with id: " + customerId)));
     }
 }

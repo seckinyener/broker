@@ -33,11 +33,12 @@ public class OrderService implements IOrderService {
 
     private final AssetRepository assetRepository;
 
+    private final CustomerService customerService;
+
     @Transactional
     @Override
     public OrderDetailsDto createOrder(CreateOrderDto createOrderDto) {
-        Customer customer = customerRepository.findCustomerById(createOrderDto.userId())
-                .orElseThrow((() -> new CustomerNotFoundException("Customer not found with id: " + createOrderDto.userId())));
+        Customer customer = customerService.findCustomerById(createOrderDto.userId());
 
         Asset assetTRY = assetRepository.findAssetByCustomerIdAndName(createOrderDto.userId(), "TRY").orElseThrow(() -> new AssetNotFoundException("Asset not found with customer id: " + createOrderDto.userId() + " and TRY"));
         BigDecimal totalAmountOfOrder = createOrderDto.size().multiply(createOrderDto.price());
@@ -67,8 +68,7 @@ public class OrderService implements IOrderService {
 
     @Override
     public List<OrderDetailsDto> getOrderListOfUserForDateRange(OrderFilterRequest orderFilterRequest) {
-        Customer customer = customerRepository.findCustomerById(orderFilterRequest.customerId())
-                .orElseThrow((() -> new CustomerNotFoundException("Customer not found with id: " + orderFilterRequest.customerId())));
+        Customer customer = customerService.findCustomerById(orderFilterRequest.customerId());
         List<Order> orderList;
         if (Objects.isNull(orderFilterRequest.getStartDate()) && Objects.isNull(orderFilterRequest.getEndDate())) {
             orderList = customer.getOrders();
@@ -84,6 +84,7 @@ public class OrderService implements IOrderService {
                 , item.getStatus(), item.getOrderSide(), item.getCreateDate())).toList();
     }
 
+    @Transactional
     @Override
     public OrderDetailsDto deleteOrder(Long orderId) {
         Order order = orderRepository.findOrderById(orderId).orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
@@ -102,6 +103,7 @@ public class OrderService implements IOrderService {
         }
     }
 
+    @Transactional
     @Override
     public OrderDetailsDto matchOrder(Long orderId) {
         Order order = orderRepository.findOrderById(orderId).orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));

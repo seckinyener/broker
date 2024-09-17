@@ -1,6 +1,7 @@
 package com.seckinyener.ing.broker.service;
 
 import com.seckinyener.ing.broker.model.dto.*;
+import com.seckinyener.ing.broker.model.entity.Customer;
 
 import java.util.List;
 
@@ -13,4 +14,6 @@ public interface ICustomerService {
     DepositResponseDto depositMoneyForCustomer(Long customerId, DepositRequestDto depositRequestDto);
 
     WithdrawResponseDto withdrawMoneyForCustomer(Long customerId, WithdrawRequestDto withdrawRequestDto);
+
+    Customer findCustomerById(Long customerId);
 }
