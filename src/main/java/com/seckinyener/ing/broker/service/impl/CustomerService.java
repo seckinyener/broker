@@ -1,6 +1,8 @@
 package com.seckinyener.ing.broker.service.impl;
 
 import com.seckinyener.ing.broker.exception.CustomerAlreadyExistException;
+import com.seckinyener.ing.broker.exception.CustomerNotFoundException;
+import com.seckinyener.ing.broker.model.dto.AssetDetailsDto;
 import com.seckinyener.ing.broker.model.dto.CreateCustomerDto;
 import com.seckinyener.ing.broker.model.dto.CustomerDetailsDto;
 import com.seckinyener.ing.broker.model.entity.Asset;
@@ -13,6 +15,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
@@ -45,5 +49,12 @@ public class CustomerService implements ICustomerService {
         assetRepository.save(customerTRYAsset);
 
         return new CustomerDetailsDto(customer.getUsername(), customer.getRole());
+    }
+
+    @Override
+    public List<AssetDetailsDto> getCustomerAssets(Long customerId) {
+        Customer customer = customerRepository.findCustomerById(customerId)
+                .orElseThrow((() -> new CustomerNotFoundException("Customer not found with id: " + customerId)));
+        return customer.getAssets().stream().sorted(Comparator.comparing(Asset::getSize).reversed()).map(item -> new AssetDetailsDto(item.getName(), item.getSize(), item.getUsableSize(), item.getUpdateDate())).toList();
     }
 }
