@@ -33,4 +33,9 @@ public class CustomerController {
         return new ResponseEntity<>(customerService.depositMoneyForCustomer(customerId, depositRequestDto), HttpStatus.OK);
     }
 
+    @PostMapping("/{customerId}/withdraw")
+    ResponseEntity<WithdrawResponseDto> depositMoneyForCustomer(@PathVariable("customerId") Long customerId, @RequestBody WithdrawRequestDto withdrawRequestDto) {
+        return new ResponseEntity<>(customerService.withdrawMoneyForCustomer(customerId, withdrawRequestDto), HttpStatus.OK);
+    }
+
 }

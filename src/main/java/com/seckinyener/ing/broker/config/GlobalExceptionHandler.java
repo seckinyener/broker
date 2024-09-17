@@ -54,4 +54,11 @@ public class GlobalExceptionHandler {
     public ErrorResponseDto handleOrderStatusNotValidForDeletingException(OrderStatusNotValidForDeletingException e) {
         return new ErrorResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST.value(), LocalDateTime.now());
     }
+
+    @ExceptionHandler(UsableSizeIsNotSufficientForWithdrawException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    public ErrorResponseDto handleUsableSizeIsNotSufficientForWithdrawException(UsableSizeIsNotSufficientForWithdrawException e) {
+        return new ErrorResponseDto(e.getMessage(), HttpStatus.BAD_REQUEST.value(), LocalDateTime.now());
+    }
 }
