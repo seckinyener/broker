@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -27,10 +28,10 @@ public class Asset {
     private String name;
 
     @Column(name="size", nullable = false)
-    private double size;
+    private BigDecimal size;
 
     @Column(name="usable_size", nullable = false)
-    private double usableSize;
+    private BigDecimal usableSize;
 
     @Column(name="update_date", nullable = false)
     private LocalDateTime updateDate;
@@ -39,6 +40,7 @@ public class Asset {
     @JoinColumn(name="customer_id")
     private Customer customer;
 
+    @PrePersist
     @PreUpdate
     public void preUpdate() {
         updateDate = LocalDateTime.now();
