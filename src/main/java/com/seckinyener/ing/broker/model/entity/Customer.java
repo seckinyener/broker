@@ -34,4 +34,7 @@ public class Customer {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer")
     private List<Asset> assets;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "customer")
+    private List<Order> orders;
 }
