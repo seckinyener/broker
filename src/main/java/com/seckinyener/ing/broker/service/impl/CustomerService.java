@@ -1,6 +1,5 @@
 package com.seckinyener.ing.broker.service.impl;
 
-import com.seckinyener.ing.broker.exception.AssetNotFoundException;
 import com.seckinyener.ing.broker.exception.CustomerAlreadyExistException;
 import com.seckinyener.ing.broker.exception.CustomerNotFoundException;
 import com.seckinyener.ing.broker.exception.UsableSizeIsNotSufficientForWithdrawException;
@@ -26,6 +25,8 @@ public class CustomerService implements ICustomerService {
     private final CustomerRepository customerRepository;
 
     private final AssetRepository assetRepository;
+
+    private final AssetService assetService;
 
     @Transactional
     @Override
@@ -60,7 +61,7 @@ public class CustomerService implements ICustomerService {
     @Transactional
     @Override
     public DepositResponseDto depositMoneyForCustomer(Long customerId, DepositRequestDto depositRequestDto) {
-        Asset assetTRY = assetRepository.findAssetByCustomerIdAndName(customerId, "TRY").orElseThrow(() -> new AssetNotFoundException("Asset not found with customer id: " + customerId + " and TRY"));
+        Asset assetTRY = assetService.findAssetByCustomerIdAndName(customerId, "TRY");
         assetTRY.setUsableSize(assetTRY.getUsableSize().add(depositRequestDto.amount()));
         assetTRY.setSize(assetTRY.getSize().add(depositRequestDto.amount()));
         assetRepository.save(assetTRY);
@@ -70,7 +71,7 @@ public class CustomerService implements ICustomerService {
     @Transactional
     @Override
     public WithdrawResponseDto withdrawMoneyForCustomer(Long customerId, WithdrawRequestDto withdrawRequestDto) {
-        Asset assetTRY = assetRepository.findAssetByCustomerIdAndName(customerId, "TRY").orElseThrow(() -> new AssetNotFoundException("Asset not found with customer id: " + customerId + " and TRY"));
+        Asset assetTRY = assetService.findAssetByCustomerIdAndName(customerId, "TRY");
         if (assetTRY.getUsableSize().compareTo(withdrawRequestDto.amount()) < 0) {
             throw new UsableSizeIsNotSufficientForWithdrawException("Usable size is not sufficient to transfer this amount to iban");
         }

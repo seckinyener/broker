@@ -10,7 +10,6 @@ import com.seckinyener.ing.broker.model.entity.Order;
 import com.seckinyener.ing.broker.model.enumerated.SideEnum;
 import com.seckinyener.ing.broker.model.enumerated.StatusEnum;
 import com.seckinyener.ing.broker.repository.AssetRepository;
-import com.seckinyener.ing.broker.repository.CustomerRepository;
 import com.seckinyener.ing.broker.repository.OrderRepository;
 import com.seckinyener.ing.broker.service.IOrderService;
 import jakarta.transaction.Transactional;
@@ -27,20 +26,20 @@ import java.util.Optional;
 @Service
 public class OrderService implements IOrderService {
 
-    private final CustomerRepository customerRepository;
-
     private final OrderRepository orderRepository;
 
     private final AssetRepository assetRepository;
 
     private final CustomerService customerService;
 
+    private final AssetService assetService;
+
     @Transactional
     @Override
     public OrderDetailsDto createOrder(CreateOrderDto createOrderDto) {
         Customer customer = customerService.findCustomerById(createOrderDto.userId());
 
-        Asset assetTRY = assetRepository.findAssetByCustomerIdAndName(createOrderDto.userId(), "TRY").orElseThrow(() -> new AssetNotFoundException("Asset not found with customer id: " + createOrderDto.userId() + " and TRY"));
+        Asset assetTRY = assetService.findAssetByCustomerIdAndName(createOrderDto.userId(), "TRY");
         BigDecimal totalAmountOfOrder = createOrderDto.size().multiply(createOrderDto.price());
         if (assetTRY.getUsableSize().compareTo(totalAmountOfOrder) >= 0) {
             Order order = new Order();
@@ -108,7 +107,7 @@ public class OrderService implements IOrderService {
     public OrderDetailsDto matchOrder(Long orderId) {
         Order order = orderRepository.findOrderById(orderId).orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
         if (order.getStatus().equals(StatusEnum.PENDING)) {
-            Asset customerTRYBalance = assetRepository.findAssetByCustomerIdAndName(order.getCustomer().getId(), "TRY").orElseThrow(() -> new AssetNotFoundException("Asset not found with customer id: " + order.getCustomer().getId() + " and TRY"));
+            Asset customerTRYBalance = assetService.findAssetByCustomerIdAndName(order.getCustomer().getId(), "TRY");
             Optional<Asset> optionalCustomerAssetOfOrder = assetRepository.findAssetByCustomerIdAndName(orderId, order.getAsset());
 
             Asset customerAssetOfOrder;
