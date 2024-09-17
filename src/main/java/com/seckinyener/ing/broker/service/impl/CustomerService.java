@@ -1,10 +1,9 @@
 package com.seckinyener.ing.broker.service.impl;
 
+import com.seckinyener.ing.broker.exception.AssetNotFoundException;
 import com.seckinyener.ing.broker.exception.CustomerAlreadyExistException;
 import com.seckinyener.ing.broker.exception.CustomerNotFoundException;
-import com.seckinyener.ing.broker.model.dto.AssetDetailsDto;
-import com.seckinyener.ing.broker.model.dto.CreateCustomerDto;
-import com.seckinyener.ing.broker.model.dto.CustomerDetailsDto;
+import com.seckinyener.ing.broker.model.dto.*;
 import com.seckinyener.ing.broker.model.entity.Asset;
 import com.seckinyener.ing.broker.model.entity.Customer;
 import com.seckinyener.ing.broker.repository.AssetRepository;
@@ -56,5 +55,14 @@ public class CustomerService implements ICustomerService {
         Customer customer = customerRepository.findCustomerById(customerId)
                 .orElseThrow((() -> new CustomerNotFoundException("Customer not found with id: " + customerId)));
         return customer.getAssets().stream().sorted(Comparator.comparing(Asset::getSize).reversed()).map(item -> new AssetDetailsDto(item.getName(), item.getSize(), item.getUsableSize(), item.getUpdateDate())).toList();
+    }
+
+    @Override
+    public DepositResponseDto depositMoneyForCustomer(Long customerId, DepositRequestDto depositRequestDto) {
+        Asset assetTRY = assetRepository.findAssetByCustomerIdAndName(customerId, "TRY").orElseThrow(() -> new AssetNotFoundException("Asset not found with customer id: " + customerId + " and TRY"));
+        assetTRY.setUsableSize(assetTRY.getUsableSize().add(depositRequestDto.amount()));
+        assetTRY.setSize(assetTRY.getSize().add(depositRequestDto.amount()));
+        assetRepository.save(assetTRY);
+        return new DepositResponseDto(assetTRY.getSize(), assetTRY.getUsableSize());
     }
 }

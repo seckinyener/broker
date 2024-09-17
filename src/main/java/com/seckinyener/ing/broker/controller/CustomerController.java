@@ -1,8 +1,6 @@
 package com.seckinyener.ing.broker.controller;
 
-import com.seckinyener.ing.broker.model.dto.AssetDetailsDto;
-import com.seckinyener.ing.broker.model.dto.CreateCustomerDto;
-import com.seckinyener.ing.broker.model.dto.CustomerDetailsDto;
+import com.seckinyener.ing.broker.model.dto.*;
 import com.seckinyener.ing.broker.service.ICustomerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +24,13 @@ public class CustomerController {
     }
 
     @GetMapping("/{customerId}/assets")
-    ResponseEntity<List<AssetDetailsDto>> getCustomer(@PathVariable("customerId") Long customerId) {
+    ResponseEntity<List<AssetDetailsDto>> getCustomerAssets(@PathVariable("customerId") Long customerId) {
         return new ResponseEntity<>(customerService.getCustomerAssets(customerId), HttpStatus.OK);
+    }
+
+    @PostMapping("/{customerId}/deposit")
+    ResponseEntity<DepositResponseDto> depositMoneyForCustomer(@PathVariable("customerId") Long customerId, @RequestBody DepositRequestDto depositRequestDto) {
+        return new ResponseEntity<>(customerService.depositMoneyForCustomer(customerId, depositRequestDto), HttpStatus.OK);
     }
 
 }
