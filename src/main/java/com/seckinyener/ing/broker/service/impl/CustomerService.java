@@ -34,25 +34,29 @@ public class CustomerService implements ICustomerService {
     @Transactional
     @Override
     public CustomerDetailsDto createCustomer(CreateCustomerDto createCustomerDto) {
+        validateCustomerIsNotExist(createCustomerDto);
+
+        Customer customer = createAndSaveCustomer(createCustomerDto);
+
+        assetService.createAssetForCustomer(new BigDecimal(createCustomerDto.tryAmount()), customer);
+
+        return new CustomerDetailsDto(customer.getUsername(), customer.getRole());
+    }
+
+    private void validateCustomerIsNotExist(CreateCustomerDto createCustomerDto) {
         Optional<Customer> optionalCustomer = customerRepository.findCustomerByUsername(createCustomerDto.username());
         if (optionalCustomer.isPresent()) {
             throw new CustomerAlreadyExistException("Customer with username: " + createCustomerDto.username() + " already exists");
         }
+    }
 
+    private Customer createAndSaveCustomer(CreateCustomerDto createCustomerDto) {
         Customer customer = new Customer();
         customer.setUsername(createCustomerDto.username());
         customer.setPassword(passwordEncoder.encode(createCustomerDto.password()));
         customer.setRole(createCustomerDto.role());
         customerRepository.save(customer);
-
-        Asset customerTRYAsset = new Asset();
-        customerTRYAsset.setName("TRY");
-        customerTRYAsset.setSize(new BigDecimal(createCustomerDto.tryAmount()));
-        customerTRYAsset.setCustomer(customer);
-        customerTRYAsset.setUsableSize(new BigDecimal(createCustomerDto.tryAmount()));
-        assetRepository.save(customerTRYAsset);
-
-        return new CustomerDetailsDto(customer.getUsername(), customer.getRole());
+        return customer;
     }
 
     @Override
