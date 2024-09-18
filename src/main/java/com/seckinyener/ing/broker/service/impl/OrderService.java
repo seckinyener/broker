@@ -53,7 +53,7 @@ public class OrderService implements IOrderService {
             order.setAsset(createOrderDto.asset());
             orderRepository.save(order);
 
-            if (createOrderDto.side().equals(SideEnum.BUY)) {
+            if (SideEnum.BUY.equals(createOrderDto.side())) {
                 assetTRY.setUsableSize(assetTRY.getUsableSize().subtract(totalAmountOfOrder));
                 assetRepository.save(assetTRY);
             }
@@ -88,9 +88,9 @@ public class OrderService implements IOrderService {
     @Override
     public OrderDetailsDto deleteOrder(Long orderId) {
         Order order = orderRepository.findOrderById(orderId).orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
-        if (order.getStatus().equals(StatusEnum.PENDING)) {
+        if (StatusEnum.PENDING.equals(order.getStatus())) {
             order.setStatus(StatusEnum.CANCELED);
-            if (order.getOrderSide().equals(SideEnum.BUY)) {
+            if (SideEnum.BUY.equals(order.getOrderSide())) {
                 Asset assetTRY = assetRepository.findAssetByCustomerIdAndName(order.getCustomer().getId(), "TRY").orElseThrow(() -> new AssetNotFoundException("Asset not found with customer id: " + order.getCustomer().getId() + " and TRY"));
                 BigDecimal orderAmount = order.getPrice().multiply(order.getSize());
                 assetTRY.setUsableSize(assetTRY.getUsableSize().add(orderAmount));
@@ -107,7 +107,7 @@ public class OrderService implements IOrderService {
     @Override
     public OrderDetailsDto matchOrder(Long orderId) {
         Order order = orderRepository.findOrderById(orderId).orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
-        if (order.getStatus().equals(StatusEnum.PENDING)) {
+        if (StatusEnum.PENDING.equals(order.getStatus())) {
             Asset customerTRYBalance = assetService.findAssetByCustomerIdAndName(order.getCustomer().getId(), "TRY");
             Optional<Asset> optionalCustomerAssetOfOrder = assetRepository.findAssetByCustomerIdAndName(orderId, order.getAsset());
 
@@ -122,11 +122,11 @@ public class OrderService implements IOrderService {
                 customerAssetOfOrder = optionalCustomerAssetOfOrder.get();
             }
 
-            if (order.getOrderSide().equals(SideEnum.SELL)) {
+            if (SideEnum.SELL.equals(order.getOrderSide())) {
                 customerTRYBalance.setSize(customerTRYBalance.getSize().add(order.getPrice().multiply(order.getSize())));
                 customerTRYBalance.setUsableSize(customerTRYBalance.getUsableSize().add(order.getPrice().multiply(order.getSize())));
                 customerAssetOfOrder.setUsableSize(customerAssetOfOrder.getUsableSize().subtract(order.getSize()));
-            } else if (order.getOrderSide().equals(SideEnum.BUY)) {
+            } else if (SideEnum.BUY.equals(order.getOrderSide())) {
                 customerAssetOfOrder.setSize(customerAssetOfOrder.getSize().add(order.getSize()));
                 customerAssetOfOrder.setUsableSize(customerAssetOfOrder.getUsableSize().add(order.getSize()));
             }
