@@ -69,7 +69,6 @@ public class OrderService implements IOrderService {
 
     @Override
     public List<OrderDetailsDto> getOrderListOfUserForDateRange(OrderFilterRequest orderFilterRequest) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Customer customer = customerService.findCustomerById(orderFilterRequest.customerId());
         List<Order> orderList;
         if (Objects.isNull(orderFilterRequest.getStartDate()) && Objects.isNull(orderFilterRequest.getEndDate())) {
