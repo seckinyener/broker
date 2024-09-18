@@ -20,13 +20,13 @@ public class AccessControlService implements IAccessControlService {
 
     @Override
     public boolean isCustomerAuthorizedByCustomerName(Long customerId, String customerName) {
-        Customer customer = customerRepository.findCustomerByUsername(customerName).orElseThrow(() -> new CustomerNotFoundException("Customer not found"));
+        Customer customer = customerRepository.findCustomerByUsername(customerName).orElseThrow(() -> new CustomerNotFoundException("Customer not found with username: " + customerName));
         return customer.getId().equals(customerId);
     }
 
     @Override
     public boolean isCustomerAuthorizedByOrder(Long orderId, String customerName) {
-        Order order = orderRepository.findOrderById(orderId).orElseThrow(() -> new OrderNotFoundException("Order not found"));
+        Order order = orderRepository.findOrderById(orderId).orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
         Customer customer = order.getCustomer();
         return customer.getUsername().equalsIgnoreCase(customerName);
     }

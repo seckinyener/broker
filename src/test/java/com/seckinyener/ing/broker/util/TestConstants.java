@@ -17,7 +17,11 @@ public class TestConstants {
 
     public static Long customerId = 1L;
 
+    public static Long customerId_2 = 2L;
+
     public static String username = "Seckin Yener";
+
+    public static String username_2 = "Jack Daniels";
 
     public static String password = "test*0**";
 
