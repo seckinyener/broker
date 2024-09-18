@@ -11,6 +11,7 @@ import com.seckinyener.ing.broker.repository.CustomerRepository;
 import com.seckinyener.ing.broker.service.ICustomerService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -28,6 +29,8 @@ public class CustomerService implements ICustomerService {
 
     private final AssetService assetService;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Transactional
     @Override
     public CustomerDetailsDto createCustomer(CreateCustomerDto createCustomerDto) {
@@ -38,7 +41,7 @@ public class CustomerService implements ICustomerService {
 
         Customer customer = new Customer();
         customer.setUsername(createCustomerDto.username());
-        customer.setPassword(createCustomerDto.password());
+        customer.setPassword(passwordEncoder.encode(createCustomerDto.password()));
         customer.setRole(createCustomerDto.role());
         customerRepository.save(customer);
 
