@@ -26,6 +26,7 @@ public class OrderController {
         return new ResponseEntity<>(orderService.createOrder(createOrderDto), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/list")
     ResponseEntity<List<OrderDetailsDto>> getOrderListOfUserForDateRange(@RequestBody OrderFilterRequest orderFilterRequest) {
         return new ResponseEntity<>(orderService.getOrderListOfUserForDateRange(orderFilterRequest), HttpStatus.OK);

@@ -14,6 +14,8 @@ import com.seckinyener.ing.broker.repository.OrderRepository;
 import com.seckinyener.ing.broker.service.IOrderService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -67,6 +69,7 @@ public class OrderService implements IOrderService {
 
     @Override
     public List<OrderDetailsDto> getOrderListOfUserForDateRange(OrderFilterRequest orderFilterRequest) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Customer customer = customerService.findCustomerById(orderFilterRequest.customerId());
         List<Order> orderList;
         if (Objects.isNull(orderFilterRequest.getStartDate()) && Objects.isNull(orderFilterRequest.getEndDate())) {
