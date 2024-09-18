@@ -10,4 +10,6 @@ public interface IAssetService {
     Asset findAssetByCustomerIdAndName(Long customerId, String name);
 
     void createAssetForCustomer(BigDecimal amount, Customer customer);
+
+    void updateUsableSizeOfAssetBySubtractingAmount(Asset asset, BigDecimal amount);
 }

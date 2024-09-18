@@ -40,30 +40,31 @@ public class OrderService implements IOrderService {
     @Override
     public OrderDetailsDto createOrder(CreateOrderDto createOrderDto) {
         Customer customer = customerService.findCustomerById(createOrderDto.userId());
-
         Asset assetTRY = assetService.findAssetByCustomerIdAndName(createOrderDto.userId(), "TRY");
         BigDecimal totalAmountOfOrder = createOrderDto.size().multiply(createOrderDto.price());
         if (assetTRY.getUsableSize().compareTo(totalAmountOfOrder) >= 0) {
-            Order order = new Order();
-            order.setOrderSide(createOrderDto.side());
-            order.setCustomer(customer);
-            order.setStatus(StatusEnum.PENDING);
-            order.setSize(createOrderDto.size());
-            order.setPrice(createOrderDto.price());
-            order.setAsset(createOrderDto.asset());
-            orderRepository.save(order);
+            Order order = createOrderRecord(createOrderDto, customer);
 
             if (SideEnum.BUY.equals(createOrderDto.side())) {
-                assetTRY.setUsableSize(assetTRY.getUsableSize().subtract(totalAmountOfOrder));
-                assetRepository.save(assetTRY);
+                assetService.updateUsableSizeOfAssetBySubtractingAmount(assetTRY, totalAmountOfOrder);
             }
 
             return new OrderDetailsDto(order.getAsset(), order.getSize(), order.getPrice(), order.getStatus(), order.getOrderSide(), order.getCreateDate());
         } else {
             throw new TRYBalanceIsNotEnoughException("TRY balance is not enough for this order.");
         }
+    }
 
-
+    private Order createOrderRecord(CreateOrderDto createOrderDto, Customer customer) {
+        Order order = new Order();
+        order.setOrderSide(createOrderDto.side());
+        order.setCustomer(customer);
+        order.setStatus(StatusEnum.PENDING);
+        order.setSize(createOrderDto.size());
+        order.setPrice(createOrderDto.price());
+        order.setAsset(createOrderDto.asset());
+        orderRepository.save(order);
+        return order;
     }
 
     @Override

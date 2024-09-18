@@ -30,4 +30,10 @@ public class AssetService implements IAssetService {
         customerTRYAsset.setUsableSize(amount);
         assetRepository.save(customerTRYAsset);
     }
+
+    @Override
+    public void updateUsableSizeOfAssetBySubtractingAmount(Asset asset, BigDecimal amount) {
+        asset.setUsableSize(asset.getUsableSize().subtract(amount));
+        assetRepository.save(asset);
+    }
 }
