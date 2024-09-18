@@ -14,6 +14,8 @@ import com.seckinyener.ing.broker.repository.OrderRepository;
 import com.seckinyener.ing.broker.service.IOrderService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -53,9 +55,8 @@ public class OrderService implements IOrderService {
 
             if (createOrderDto.side().equals(SideEnum.BUY)) {
                 assetTRY.setUsableSize(assetTRY.getUsableSize().subtract(totalAmountOfOrder));
+                assetRepository.save(assetTRY);
             }
-
-            assetRepository.save(assetTRY);
 
             return new OrderDetailsDto(order.getAsset(), order.getSize(), order.getPrice(), order.getStatus(), order.getOrderSide(), order.getCreateDate());
         } else {
