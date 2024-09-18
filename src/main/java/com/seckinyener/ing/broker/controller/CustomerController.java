@@ -42,7 +42,7 @@ public class CustomerController {
 
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.isCustomerAuthorizedByCustomerName(#customerId, authentication.name)")
     @PostMapping("/{customerId}/withdraw")
-    ResponseEntity<WithdrawResponseDto> depositMoneyForCustomer(@PathVariable("customerId") Long customerId, @RequestBody WithdrawRequestDto withdrawRequestDto) {
+    ResponseEntity<WithdrawResponseDto> withdrawMoneyForCustomer(@PathVariable("customerId") Long customerId, @RequestBody WithdrawRequestDto withdrawRequestDto) {
         return new ResponseEntity<>(customerService.withdrawMoneyForCustomer(customerId, withdrawRequestDto), HttpStatus.OK);
     }
 

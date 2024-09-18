@@ -55,9 +55,8 @@ public class OrderService implements IOrderService {
 
             if (createOrderDto.side().equals(SideEnum.BUY)) {
                 assetTRY.setUsableSize(assetTRY.getUsableSize().subtract(totalAmountOfOrder));
+                assetRepository.save(assetTRY);
             }
-
-            assetRepository.save(assetTRY);
 
             return new OrderDetailsDto(order.getAsset(), order.getSize(), order.getPrice(), order.getStatus(), order.getOrderSide(), order.getCreateDate());
         } else {

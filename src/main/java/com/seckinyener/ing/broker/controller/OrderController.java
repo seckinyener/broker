@@ -25,6 +25,7 @@ public class OrderController {
         this.accessControlService = accessControlService;
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN') or @accessControlService.isCustomerAuthorizedByCustomerName(#createOrderDto.userId(), authentication.name)")
     @PostMapping
     ResponseEntity<OrderDetailsDto> createOrder(@RequestBody CreateOrderDto createOrderDto) {
         return new ResponseEntity<>(orderService.createOrder(createOrderDto), HttpStatus.OK);
@@ -42,7 +43,7 @@ public class OrderController {
         return new ResponseEntity<>(orderService.deleteOrder(orderId), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN') or @accessControlService.isCustomerAuthorizedByOrder(#orderId, authentication.name)")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/match/{orderId}")
     ResponseEntity<OrderDetailsDto> matchOrder(@PathVariable(name="orderId") Long orderId){
         return new ResponseEntity<>(orderService.matchOrder(orderId), HttpStatus.OK);
