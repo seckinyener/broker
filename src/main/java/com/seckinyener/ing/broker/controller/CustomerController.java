@@ -34,16 +34,4 @@ public class CustomerController {
         return new ResponseEntity<>(customerService.getCustomerAssets(customerId), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or @accessControlService.isCustomerAuthorizedByCustomerName(#customerId, authentication.name)")
-    @PostMapping("/{customerId}/deposit")
-    ResponseEntity<DepositResponseDto> depositMoneyForCustomer(@PathVariable("customerId") Long customerId, @RequestBody DepositRequestDto depositRequestDto) {
-        return new ResponseEntity<>(customerService.depositMoneyForCustomer(customerId, depositRequestDto), HttpStatus.OK);
-    }
-
-    @PreAuthorize("hasRole('ADMIN') or @accessControlService.isCustomerAuthorizedByCustomerName(#customerId, authentication.name)")
-    @PostMapping("/{customerId}/withdraw")
-    ResponseEntity<WithdrawResponseDto> withdrawMoneyForCustomer(@PathVariable("customerId") Long customerId, @RequestBody WithdrawRequestDto withdrawRequestDto) {
-        return new ResponseEntity<>(customerService.withdrawMoneyForCustomer(customerId, withdrawRequestDto), HttpStatus.OK);
-    }
-
 }

@@ -2,11 +2,9 @@ package com.seckinyener.ing.broker.service.impl;
 
 import com.seckinyener.ing.broker.exception.CustomerAlreadyExistException;
 import com.seckinyener.ing.broker.exception.CustomerNotFoundException;
-import com.seckinyener.ing.broker.exception.UsableSizeIsNotSufficientForWithdrawException;
 import com.seckinyener.ing.broker.model.dto.*;
 import com.seckinyener.ing.broker.model.entity.Asset;
 import com.seckinyener.ing.broker.model.entity.Customer;
-import com.seckinyener.ing.broker.repository.AssetRepository;
 import com.seckinyener.ing.broker.repository.CustomerRepository;
 import com.seckinyener.ing.broker.service.ICustomerService;
 import jakarta.transaction.Transactional;
@@ -24,8 +22,6 @@ import java.util.Optional;
 public class CustomerService implements ICustomerService {
 
     private final CustomerRepository customerRepository;
-
-    private final AssetRepository assetRepository;
 
     private final AssetService assetService;
 
@@ -63,30 +59,6 @@ public class CustomerService implements ICustomerService {
     public List<AssetDetailsDto> getCustomerAssets(Long customerId) {
         Customer customer = findCustomerById(customerId);
         return customer.getAssets().stream().sorted(Comparator.comparing(Asset::getSize).reversed()).map(item -> new AssetDetailsDto(item.getName(), item.getSize(), item.getUsableSize(), item.getUpdateDate())).toList();
-    }
-
-    @Transactional
-    @Override
-    public DepositResponseDto depositMoneyForCustomer(Long customerId, DepositRequestDto depositRequestDto) {
-        Asset assetTRY = assetService.findAssetByCustomerIdAndName(customerId, "TRY");
-        assetTRY.setUsableSize(assetTRY.getUsableSize().add(depositRequestDto.amount()));
-        assetTRY.setSize(assetTRY.getSize().add(depositRequestDto.amount()));
-        assetRepository.save(assetTRY);
-        return new DepositResponseDto(assetTRY.getSize(), assetTRY.getUsableSize());
-    }
-
-    @Transactional
-    @Override
-    public WithdrawResponseDto withdrawMoneyForCustomer(Long customerId, WithdrawRequestDto withdrawRequestDto) {
-        Asset assetTRY = assetService.findAssetByCustomerIdAndName(customerId, "TRY");
-        if (assetTRY.getUsableSize().compareTo(withdrawRequestDto.amount()) < 0) {
-            throw new UsableSizeIsNotSufficientForWithdrawException("Usable size is not sufficient to transfer this amount to iban");
-        }
-        // We can think to send this amount to the iban number which is provided in request dto.
-        assetTRY.setSize(assetTRY.getSize().subtract(withdrawRequestDto.amount()));
-        assetTRY.setUsableSize(assetTRY.getUsableSize().subtract(withdrawRequestDto.amount()));
-        assetRepository.save(assetTRY);
-        return new WithdrawResponseDto(assetTRY.getSize(), assetTRY.getUsableSize(), withdrawRequestDto.iban());
     }
 
     @Override

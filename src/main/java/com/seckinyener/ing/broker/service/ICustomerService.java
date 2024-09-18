@@ -11,9 +11,5 @@ public interface ICustomerService {
 
     List<AssetDetailsDto> getCustomerAssets(Long customerId);
 
-    DepositResponseDto depositMoneyForCustomer(Long customerId, DepositRequestDto depositRequestDto);
-
-    WithdrawResponseDto withdrawMoneyForCustomer(Long customerId, WithdrawRequestDto withdrawRequestDto);
-
     Customer findCustomerById(Long customerId);
 }

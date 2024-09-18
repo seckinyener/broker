@@ -1,12 +1,18 @@
 package com.seckinyener.ing.broker.service.impl;
 
 import com.seckinyener.ing.broker.exception.AssetNotFoundException;
+import com.seckinyener.ing.broker.exception.UsableSizeIsNotSufficientForWithdrawException;
+import com.seckinyener.ing.broker.model.dto.DepositRequestDto;
+import com.seckinyener.ing.broker.model.dto.DepositResponseDto;
+import com.seckinyener.ing.broker.model.dto.WithdrawRequestDto;
+import com.seckinyener.ing.broker.model.dto.WithdrawResponseDto;
 import com.seckinyener.ing.broker.model.entity.Asset;
 import com.seckinyener.ing.broker.model.entity.Customer;
 import com.seckinyener.ing.broker.model.entity.Order;
 import com.seckinyener.ing.broker.model.enumerated.SideEnum;
 import com.seckinyener.ing.broker.repository.AssetRepository;
 import com.seckinyener.ing.broker.service.IAssetService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -78,5 +84,29 @@ public class AssetService implements IAssetService {
         BigDecimal orderAmount = order.getPrice().multiply(order.getSize());
         assetTRY.setUsableSize(assetTRY.getUsableSize().add(orderAmount));
         assetRepository.save(assetTRY);
+    }
+
+    @Transactional
+    @Override
+    public DepositResponseDto depositMoneyForCustomer(Long customerId, DepositRequestDto depositRequestDto) {
+        Asset assetTRY = findAssetByCustomerIdAndName(customerId, "TRY");
+        assetTRY.setUsableSize(assetTRY.getUsableSize().add(depositRequestDto.amount()));
+        assetTRY.setSize(assetTRY.getSize().add(depositRequestDto.amount()));
+        assetRepository.save(assetTRY);
+        return new DepositResponseDto(assetTRY.getSize(), assetTRY.getUsableSize());
+    }
+
+    @Transactional
+    @Override
+    public WithdrawResponseDto withdrawMoneyForCustomer(Long customerId, WithdrawRequestDto withdrawRequestDto) {
+        Asset assetTRY = findAssetByCustomerIdAndName(customerId, "TRY");
+        if (assetTRY.getUsableSize().compareTo(withdrawRequestDto.amount()) < 0) {
+            throw new UsableSizeIsNotSufficientForWithdrawException("Usable size is not sufficient to transfer this amount to iban");
+        }
+        // We can think to send this amount to the iban number which is provided in request dto.
+        assetTRY.setSize(assetTRY.getSize().subtract(withdrawRequestDto.amount()));
+        assetTRY.setUsableSize(assetTRY.getUsableSize().subtract(withdrawRequestDto.amount()));
+        assetRepository.save(assetTRY);
+        return new WithdrawResponseDto(assetTRY.getSize(), assetTRY.getUsableSize(), withdrawRequestDto.iban());
     }
 }

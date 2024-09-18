@@ -1,5 +1,9 @@
 package com.seckinyener.ing.broker.service;
 
+import com.seckinyener.ing.broker.model.dto.DepositRequestDto;
+import com.seckinyener.ing.broker.model.dto.DepositResponseDto;
+import com.seckinyener.ing.broker.model.dto.WithdrawRequestDto;
+import com.seckinyener.ing.broker.model.dto.WithdrawResponseDto;
 import com.seckinyener.ing.broker.model.entity.Asset;
 import com.seckinyener.ing.broker.model.entity.Customer;
 import com.seckinyener.ing.broker.model.entity.Order;
@@ -17,4 +21,8 @@ public interface IAssetService {
     void updateAssetValuesForMatchedOrder(Order order);
 
     void updateAssetUsableSizeWhenOrderIsDeleted(Order order);
+
+    DepositResponseDto depositMoneyForCustomer(Long customerId, DepositRequestDto depositRequestDto);
+
+    WithdrawResponseDto withdrawMoneyForCustomer(Long customerId, WithdrawRequestDto withdrawRequestDto);
 }
