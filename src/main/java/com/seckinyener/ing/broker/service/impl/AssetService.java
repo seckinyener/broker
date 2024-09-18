@@ -72,6 +72,7 @@ public class AssetService implements IAssetService {
         } else if (SideEnum.BUY.equals(order.getOrderSide())) {
             customerAssetOfOrder.setSize(customerAssetOfOrder.getSize().add(order.getSize()));
             customerAssetOfOrder.setUsableSize(customerAssetOfOrder.getUsableSize().add(order.getSize()));
+            customerTRYBalance.setSize(customerTRYBalance.getSize().subtract(order.getPrice().multiply(order.getSize())));
         }
 
         assetRepository.save(customerAssetOfOrder);
@@ -80,7 +81,7 @@ public class AssetService implements IAssetService {
 
     @Override
     public void updateAssetUsableSizeWhenOrderIsDeleted(Order order) {
-        Asset assetTRY = assetRepository.findAssetByCustomerIdAndName(order.getCustomer().getId(), "TRY").orElseThrow(() -> new AssetNotFoundException("Asset not found with customer id: " + order.getCustomer().getId() + " and TRY"));
+        Asset assetTRY = findAssetByCustomerIdAndName(order.getCustomer().getId(), "TRY");
         BigDecimal orderAmount = order.getPrice().multiply(order.getSize());
         assetTRY.setUsableSize(assetTRY.getUsableSize().add(orderAmount));
         assetRepository.save(assetTRY);

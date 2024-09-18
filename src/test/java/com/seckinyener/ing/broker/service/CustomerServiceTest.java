@@ -52,7 +52,6 @@ public class CustomerServiceTest {
                 () -> customerService.findCustomerById(customerId)
         );
 
-
         assertEquals("Customer not found with id: " + customerId, exception.getMessage());
         verify(customerRepository, times(1)).findCustomerById(customerId);
     }

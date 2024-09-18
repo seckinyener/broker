@@ -27,7 +27,7 @@ public class TestConstants {
 
     public static String assetName2 = "Asset2";
 
-    public static Long orderId = 2L;
+    public static Long orderId = 1L;
 
     public static Customer createCustomer(Long customerId, String username, String password, RoleEnum role) {
         Customer customer = new Customer();
