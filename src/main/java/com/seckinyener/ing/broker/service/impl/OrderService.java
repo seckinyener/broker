@@ -9,7 +9,6 @@ import com.seckinyener.ing.broker.model.entity.Customer;
 import com.seckinyener.ing.broker.model.entity.Order;
 import com.seckinyener.ing.broker.model.enumerated.SideEnum;
 import com.seckinyener.ing.broker.model.enumerated.StatusEnum;
-import com.seckinyener.ing.broker.repository.AssetRepository;
 import com.seckinyener.ing.broker.repository.OrderRepository;
 import com.seckinyener.ing.broker.service.IOrderService;
 import jakarta.transaction.Transactional;
