@@ -27,8 +27,6 @@ public class OrderService implements IOrderService {
 
     private final OrderRepository orderRepository;
 
-    private final AssetRepository assetRepository;
-
     private final CustomerService customerService;
 
     private final AssetService assetService;
@@ -89,10 +87,7 @@ public class OrderService implements IOrderService {
         if (StatusEnum.PENDING.equals(order.getStatus())) {
             order.setStatus(StatusEnum.CANCELED);
             if (SideEnum.BUY.equals(order.getOrderSide())) {
-                Asset assetTRY = assetRepository.findAssetByCustomerIdAndName(order.getCustomer().getId(), "TRY").orElseThrow(() -> new AssetNotFoundException("Asset not found with customer id: " + order.getCustomer().getId() + " and TRY"));
-                BigDecimal orderAmount = order.getPrice().multiply(order.getSize());
-                assetTRY.setUsableSize(assetTRY.getUsableSize().add(orderAmount));
-                assetRepository.save(assetTRY);
+                assetService.updateAssetUsableSizeWhenOrderIsDeleted(order);
             }
             orderRepository.save(order);
             return new OrderDetailsDto(order.getAsset(), order.getSize(), order.getPrice(), order.getStatus(), order.getOrderSide(), order.getCreateDate());

@@ -71,4 +71,12 @@ public class AssetService implements IAssetService {
         assetRepository.save(customerAssetOfOrder);
         assetRepository.save(customerTRYBalance);
     }
+
+    @Override
+    public void updateAssetUsableSizeWhenOrderIsDeleted(Order order) {
+        Asset assetTRY = assetRepository.findAssetByCustomerIdAndName(order.getCustomer().getId(), "TRY").orElseThrow(() -> new AssetNotFoundException("Asset not found with customer id: " + order.getCustomer().getId() + " and TRY"));
+        BigDecimal orderAmount = order.getPrice().multiply(order.getSize());
+        assetTRY.setUsableSize(assetTRY.getUsableSize().add(orderAmount));
+        assetRepository.save(assetTRY);
+    }
 }

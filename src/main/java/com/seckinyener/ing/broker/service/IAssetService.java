@@ -15,4 +15,6 @@ public interface IAssetService {
     void updateUsableSizeOfAssetBySubtractingAmount(Asset asset, BigDecimal amount);
 
     void updateAssetValuesForMatchedOrder(Order order);
+
+    void updateAssetUsableSizeWhenOrderIsDeleted(Order order);
 }
