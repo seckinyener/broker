@@ -4,7 +4,7 @@ import com.seckinyener.ing.broker.model.dto.CreateOrderDto;
 import com.seckinyener.ing.broker.model.dto.OrderDetailsDto;
 import com.seckinyener.ing.broker.model.dto.OrderFilterRequest;
 import com.seckinyener.ing.broker.service.IOrderService;
-import com.seckinyener.ing.broker.service.impl.AccessControlService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,18 +12,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/order")
 public class OrderController {
 
     private final IOrderService orderService;
 
-    private final AccessControlService accessControlService;
-
-    public OrderController(IOrderService orderService, AccessControlService accessControlService) {
-        this.orderService = orderService;
-        this.accessControlService = accessControlService;
-    }
 
     @PreAuthorize("hasRole('ROLE_ADMIN') or @accessControlService.isCustomerAuthorizedByCustomerName(#createOrderDto.userId(), authentication.name)")
     @PostMapping

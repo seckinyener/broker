@@ -2,7 +2,7 @@ package com.seckinyener.ing.broker.controller;
 
 import com.seckinyener.ing.broker.model.dto.*;
 import com.seckinyener.ing.broker.service.ICustomerService;
-import com.seckinyener.ing.broker.service.impl.AccessControlService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -10,18 +10,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/customer")
 public class CustomerController {
 
     private final ICustomerService customerService;
-
-    private final AccessControlService accessControlService;
-
-    public CustomerController(ICustomerService customerService, AccessControlService accessControlService) {
-        this.customerService = customerService;
-        this.accessControlService = accessControlService;
-    }
 
     @PostMapping
     ResponseEntity<CustomerDetailsDto> createCustomer(@RequestBody CreateCustomerDto createCustomerDto) {

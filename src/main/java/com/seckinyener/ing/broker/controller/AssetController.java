@@ -5,20 +5,18 @@ import com.seckinyener.ing.broker.model.dto.DepositResponseDto;
 import com.seckinyener.ing.broker.model.dto.WithdrawRequestDto;
 import com.seckinyener.ing.broker.model.dto.WithdrawResponseDto;
 import com.seckinyener.ing.broker.service.impl.AssetService;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/asset")
 public class AssetController {
 
     private final AssetService assetService;
-
-    public AssetController(AssetService assetService) {
-        this.assetService = assetService;
-    }
 
     @PreAuthorize("hasRole('ADMIN') or @accessControlService.isCustomerAuthorizedByCustomerName(#customerId, authentication.name)")
     @PostMapping("/{customerId}/deposit")
