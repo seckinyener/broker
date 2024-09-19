@@ -13,15 +13,19 @@ import com.seckinyener.ing.broker.model.enumerated.SideEnum;
 import com.seckinyener.ing.broker.repository.AssetRepository;
 import com.seckinyener.ing.broker.service.IAssetService;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class AssetService implements IAssetService {
+
+    @Value("${try.currency}")
+    private String tryCurrency;
 
     private final AssetRepository assetRepository;
 
@@ -33,7 +37,7 @@ public class AssetService implements IAssetService {
     @Override
     public void createAssetForCustomer(BigDecimal amount, Customer customer) {
         Asset customerTRYAsset = new Asset();
-        customerTRYAsset.setName("TRY");
+        customerTRYAsset.setName(tryCurrency);
         customerTRYAsset.setSize(amount);
         customerTRYAsset.setCustomer(customer);
         customerTRYAsset.setUsableSize(amount);
@@ -56,19 +60,20 @@ public class AssetService implements IAssetService {
     }
 
     private Asset getAssetOfOrder(Order order) {
-        Optional<Asset> optionalCustomerAssetOfOrder = assetRepository.findAssetByCustomerIdAndName(order.getId(), order.getAsset());
+        Optional<Asset> optionalCustomerAssetOfOrder = assetRepository.findAssetByCustomerIdAndName(order.getCustomer().getId(), order.getAsset());
         return optionalCustomerAssetOfOrder.orElseGet(() -> createAssetWithZeroSize(order.getAsset(), order.getCustomer()));
     }
 
     @Override
     public void updateAssetValuesForMatchedOrder(Order order) {
-        Asset customerTRYBalance = findAssetByCustomerIdAndName(order.getCustomer().getId(), "TRY");
+        Asset customerTRYBalance = findAssetByCustomerIdAndName(order.getCustomer().getId(), tryCurrency);
         Asset customerAssetOfOrder = getAssetOfOrder(order);
 
         if (SideEnum.SELL.equals(order.getOrderSide())) {
             customerTRYBalance.setSize(customerTRYBalance.getSize().add(order.getPrice().multiply(order.getSize())));
             customerTRYBalance.setUsableSize(customerTRYBalance.getUsableSize().add(order.getPrice().multiply(order.getSize())));
             customerAssetOfOrder.setUsableSize(customerAssetOfOrder.getUsableSize().subtract(order.getSize()));
+            customerAssetOfOrder.setSize(customerAssetOfOrder.getSize().subtract(order.getSize()));
         } else if (SideEnum.BUY.equals(order.getOrderSide())) {
             customerAssetOfOrder.setSize(customerAssetOfOrder.getSize().add(order.getSize()));
             customerAssetOfOrder.setUsableSize(customerAssetOfOrder.getUsableSize().add(order.getSize()));
@@ -81,7 +86,7 @@ public class AssetService implements IAssetService {
 
     @Override
     public void updateAssetUsableSizeWhenOrderIsDeleted(Order order) {
-        Asset assetTRY = findAssetByCustomerIdAndName(order.getCustomer().getId(), "TRY");
+        Asset assetTRY = findAssetByCustomerIdAndName(order.getCustomer().getId(), tryCurrency);
         BigDecimal orderAmount = order.getPrice().multiply(order.getSize());
         assetTRY.setUsableSize(assetTRY.getUsableSize().add(orderAmount));
         assetRepository.save(assetTRY);
@@ -90,7 +95,7 @@ public class AssetService implements IAssetService {
     @Transactional
     @Override
     public DepositResponseDto depositMoneyForCustomer(Long customerId, DepositRequestDto depositRequestDto) {
-        Asset assetTRY = findAssetByCustomerIdAndName(customerId, "TRY");
+        Asset assetTRY = findAssetByCustomerIdAndName(customerId, tryCurrency);
         assetTRY.setUsableSize(assetTRY.getUsableSize().add(depositRequestDto.amount()));
         assetTRY.setSize(assetTRY.getSize().add(depositRequestDto.amount()));
         assetRepository.save(assetTRY);
@@ -100,7 +105,7 @@ public class AssetService implements IAssetService {
     @Transactional
     @Override
     public WithdrawResponseDto withdrawMoneyForCustomer(Long customerId, WithdrawRequestDto withdrawRequestDto) {
-        Asset assetTRY = findAssetByCustomerIdAndName(customerId, "TRY");
+        Asset assetTRY = findAssetByCustomerIdAndName(customerId, tryCurrency);
         if (assetTRY.getUsableSize().compareTo(withdrawRequestDto.amount()) < 0) {
             throw new UsableSizeIsNotSufficientForWithdrawException("Usable size is not sufficient to transfer this amount to iban");
         }

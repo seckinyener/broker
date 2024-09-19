@@ -12,7 +12,8 @@ import com.seckinyener.ing.broker.model.enumerated.StatusEnum;
 import com.seckinyener.ing.broker.repository.OrderRepository;
 import com.seckinyener.ing.broker.service.IOrderService;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -20,9 +21,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class OrderService implements IOrderService {
+
+    @Value("${try.currency}")
+    private String tryCurrency;
 
     private final OrderRepository orderRepository;
 
@@ -34,15 +38,31 @@ public class OrderService implements IOrderService {
     @Override
     public OrderDetailsDto createOrder(CreateOrderDto createOrderDto) {
         Customer customer = customerService.findCustomerById(createOrderDto.userId());
-        Asset assetTRY = assetService.findAssetByCustomerIdAndName(createOrderDto.userId(), "TRY");
+
+        if(SideEnum.BUY.equals(createOrderDto.side())) {
+            return handeBuyOrders(createOrderDto, customer);
+        } else {
+            return handleSellOrders(createOrderDto, customer);
+        }
+    }
+
+    private OrderDetailsDto handleSellOrders(CreateOrderDto createOrderDto, Customer customer) {
+        Asset assetOfOrder = assetService.findAssetByCustomerIdAndName(createOrderDto.userId(), createOrderDto.asset());
+        Order order;
+        if (assetOfOrder.getUsableSize().compareTo(createOrderDto.size()) >= 0) {
+            order = createOrderRecord(createOrderDto, customer);
+        } else {
+            throw new AssetBalanceIsNotEnoughException("Asset " + createOrderDto.asset() + " balance is not enough for this order.");
+        }
+        return new OrderDetailsDto(order.getAsset(), order.getSize(), order.getPrice(), order.getStatus(), order.getOrderSide(), order.getCreateDate());
+    }
+
+    private OrderDetailsDto handeBuyOrders(CreateOrderDto createOrderDto, Customer customer) {
+        Asset assetTRY = assetService.findAssetByCustomerIdAndName(createOrderDto.userId(), tryCurrency);
         BigDecimal totalAmountOfOrder = createOrderDto.size().multiply(createOrderDto.price());
         if (assetTRY.getUsableSize().compareTo(totalAmountOfOrder) >= 0) {
             Order order = createOrderRecord(createOrderDto, customer);
-
-            if (SideEnum.BUY.equals(createOrderDto.side())) {
-                assetService.updateUsableSizeOfAssetBySubtractingAmount(assetTRY, totalAmountOfOrder);
-            }
-
+            assetService.updateUsableSizeOfAssetBySubtractingAmount(assetTRY, totalAmountOfOrder);
             return new OrderDetailsDto(order.getAsset(), order.getSize(), order.getPrice(), order.getStatus(), order.getOrderSide(), order.getCreateDate());
         } else {
             throw new TRYBalanceIsNotEnoughException("TRY balance is not enough for this order.");
