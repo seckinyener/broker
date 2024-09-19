@@ -21,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -39,6 +40,9 @@ public class AssetServiceTest {
 
     @Mock
     private AssetRepository assetRepository;
+
+    @Value("${try.currency}")
+    private String currency;
 
     @Test
     void findAssetByCustomerIdAndNameShouldThrowAssetNotFoundException() {
@@ -71,7 +75,7 @@ public class AssetServiceTest {
         verify(assetRepository, times(1)).save(assetCaptor.capture());
 
         Asset capturedAsset = assetCaptor.getValue();
-        assertEquals(capturedAsset.getName(), "TRY");
+        assertEquals(capturedAsset.getName(), currency);
         assertEquals(capturedAsset.getUsableSize(), amount);
         assertEquals(capturedAsset.getSize(), amount);
         assertEquals(capturedAsset.getCustomer(), customer);
@@ -93,7 +97,7 @@ public class AssetServiceTest {
         Asset customerTRYBalance = createAsset("TRY", new BigDecimal(1000), new BigDecimal(1000));
         Asset customerAssetOfOrder = createAsset(assetName1, BigDecimal.TEN, BigDecimal.TEN);
 
-        doReturn(customerTRYBalance).when(assetService).findAssetByCustomerIdAndName(customerId, "TRY");
+        doReturn(customerTRYBalance).when(assetService).findAssetByCustomerIdAndName(customerId, currency);
         when(assetRepository.findAssetByCustomerIdAndName(customerId, assetName1)).thenReturn(Optional.of(customerAssetOfOrder));
 
         assetService.updateAssetValuesForMatchedOrder(order);
@@ -120,7 +124,7 @@ public class AssetServiceTest {
         Asset customerTRYBalance = createAsset("TRY", new BigDecimal(1000), new BigDecimal(1000));
         Asset customerAssetOfOrder = createAsset(assetName1, BigDecimal.TEN, BigDecimal.TEN);
 
-        doReturn(customerTRYBalance).when(assetService).findAssetByCustomerIdAndName(customerId, "TRY");
+        doReturn(customerTRYBalance).when(assetService).findAssetByCustomerIdAndName(customerId, currency);
         when(assetRepository.findAssetByCustomerIdAndName(customerId, assetName1)).thenReturn(Optional.of(customerAssetOfOrder));
 
         assetService.updateAssetValuesForMatchedOrder(order);
@@ -136,7 +140,7 @@ public class AssetServiceTest {
         Asset customerTRYBalance = createAsset("TRY", new BigDecimal(1000), new BigDecimal(1000));
         WithdrawRequestDto withdrawRequestDto = new WithdrawRequestDto(new BigDecimal(1500), "ibanNumber");
 
-        doReturn(customerTRYBalance).when(assetService).findAssetByCustomerIdAndName(customerId, "TRY");
+        doReturn(customerTRYBalance).when(assetService).findAssetByCustomerIdAndName(customerId, currency);
 
         UsableSizeIsNotSufficientForWithdrawException exception = assertThrows(
                 UsableSizeIsNotSufficientForWithdrawException.class,
@@ -151,7 +155,7 @@ public class AssetServiceTest {
         Asset customerTRYBalance = createAsset("TRY", new BigDecimal(1000), new BigDecimal(1000));
         WithdrawRequestDto withdrawRequestDto = new WithdrawRequestDto(new BigDecimal(500), "ibanNumber");
 
-        doReturn(customerTRYBalance).when(assetService).findAssetByCustomerIdAndName(customerId, "TRY");
+        doReturn(customerTRYBalance).when(assetService).findAssetByCustomerIdAndName(customerId, currency);
 
         WithdrawResponseDto response = assetService.withdrawMoneyForCustomer(customerId, withdrawRequestDto);
 
@@ -165,7 +169,7 @@ public class AssetServiceTest {
         Asset customerTRYBalance = createAsset("TRY", new BigDecimal(1000), new BigDecimal(1000));
         DepositRequestDto depositRequestDto = new DepositRequestDto(new BigDecimal(500));
 
-        doReturn(customerTRYBalance).when(assetService).findAssetByCustomerIdAndName(customerId, "TRY");
+        doReturn(customerTRYBalance).when(assetService).findAssetByCustomerIdAndName(customerId, currency);
 
         DepositResponseDto response = assetService.depositMoneyForCustomer(customerId, depositRequestDto);
 
@@ -187,7 +191,7 @@ public class AssetServiceTest {
         order.setId(orderId);
 
         Asset customerTRYBalance = createAsset("TRY", new BigDecimal(1000), new BigDecimal(1000));
-        doReturn(customerTRYBalance).when(assetService).findAssetByCustomerIdAndName(customerId, "TRY");
+        doReturn(customerTRYBalance).when(assetService).findAssetByCustomerIdAndName(customerId, currency);
 
         assetService.updateAssetUsableSizeWhenOrderIsDeleted(order);
 

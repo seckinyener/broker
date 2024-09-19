@@ -21,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -48,6 +49,9 @@ public class OrderServiceTest {
     @Mock
     private OrderRepository orderRepository;
 
+    @Value("${try.currency}")
+    private String currency;
+
     @Test
     void createOrderShouldThrowTRYBalanceIsNotEnoughException() {
         CreateOrderDto createOrderDto = new CreateOrderDto(customerId, assetName1, SideEnum.BUY, new BigDecimal(10), new BigDecimal(20));
@@ -55,7 +59,7 @@ public class OrderServiceTest {
         Asset assetTRY = createAsset("TRY", BigDecimal.TEN, BigDecimal.TEN);
 
         when(customerService.findCustomerById(customerId)).thenReturn(customer);
-        when(assetService.findAssetByCustomerIdAndName(customerId, "TRY")).thenReturn(assetTRY);
+        when(assetService.findAssetByCustomerIdAndName(customerId, currency)).thenReturn(assetTRY);
 
         TRYBalanceIsNotEnoughException thrown = assertThrows(TRYBalanceIsNotEnoughException.class, () -> {
             orderService.createOrder(createOrderDto);
@@ -79,7 +83,7 @@ public class OrderServiceTest {
         order.setCreateDate(LocalDateTime.now());
 
         when(customerService.findCustomerById(customerId)).thenReturn(customer);
-        when(assetService.findAssetByCustomerIdAndName(customerId, "TRY")).thenReturn(assetTRY);
+        when(assetService.findAssetByCustomerIdAndName(customerId, currency)).thenReturn(assetTRY);
         when(orderRepository.save(any(Order.class))).thenReturn(order);
 
         OrderDetailsDto result = orderService.createOrder(createOrderDto);
